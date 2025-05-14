@@ -28,5 +28,6 @@ class Database:
             'user_type': user.user_type,
             'created_at': user.created_at,
             'updated_at': user.updated_at,
-        }, created
+            'created': created
+        }
     
