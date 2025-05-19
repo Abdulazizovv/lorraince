@@ -1,5 +1,6 @@
 from asgiref.sync import sync_to_async
 from botapp.models import BotUser
+from product.models import SoftSlideMirror, SoftSlideElement
 
 class Database:
 
@@ -31,3 +32,20 @@ class Database:
             'created': created
         }
     
+
+    @staticmethod
+    @sync_to_async
+    def get_softslide_mirrors_name():
+        """
+        Get all soft slide mirrors from the database.
+        """
+        return SoftSlideMirror.objects.all().values_list('name', flat=True)
+
+
+    @staticmethod
+    @sync_to_async
+    def get_softslide_mirror_by_name(name: str):
+        """
+        Get a soft slide mirror by its name.
+        """
+        return SoftSlideMirror.objects.filter(name=name).first()

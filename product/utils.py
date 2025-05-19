@@ -5,7 +5,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from product.models import SoftSlide
+    from product.models import SoftSlide, SoftSlideElement
 
 
 def toImgOpenCV(imgPIL) -> np.ndarray:
@@ -82,7 +82,7 @@ class SoftSlideDrawer:
             n: ImageFont.truetype("src/Inter.ttf", size=n) for n in range(20, 100)
         }
         self.cross = cv2.imread("src/cross.png", cv2.IMREAD_UNCHANGED)
-        self.logo = cv2.imread("src/logo.jpg")
+        self.logo = cv2.imread("src/logo.png")
 
     def draw_text(self, draw, x, y, text, color, fontSize):
         # img = Image.new("RGB", (3309, 2339))
@@ -310,3 +310,407 @@ class SoftSlideDrawer:
         f.close()
 
         return rect
+    
+    def draw_sizes(self, door: "SoftSlide", rect: np.ndarray):
+        tlw = 50 / door.width
+        tlh = 50 / door.height
+
+        self.arrow(
+            rect,
+            (self.padding, self.padding - 70),
+            (door.width + self.padding, self.padding - 70),
+            (255, 0, 0),
+            5,
+            tlw,
+        )
+
+        cv2.putText(
+            rect,
+            str(door.width),
+            ((door.width // 2) + self.padding // 2, self.padding - 130),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            4,
+            (255, 0, 0),
+            thickness=10,
+        )
+
+        self.arrow(
+            rect,
+            (self.padding - 70, self.padding),
+            (self.padding - 70, door.height + self.padding),
+            (255, 0, 0),
+            5,
+            tlh,
+        )
+
+        cv2.putText(
+            rect,
+            str(door.height),
+            (0, (door.height // 2) + self.padding),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            4,
+            (255, 0, 0),
+            thickness=10,
+        )
+
+        if door.cols > 1:
+            w = door.width // door.cols
+            for i in range(door.cols):
+
+
+                tl = 50 / w
+                self.arrow(
+                    rect,
+                    (
+                        (w * i + self.padding) + (5 if (i != 0) else 0),
+                        door.height + (self.padding + 70),
+                    ),
+                    (
+                        (w * i + self.padding + w) - (5 if (i != door.cols - 1) else 0),
+                        door.height + (self.padding + 70),
+                    ),
+                    (2550, 0, 0),
+                    5,
+                    tl,
+                )
+                ts = cv2.getTextSize(str(w), cv2.FONT_HERSHEY_SIMPLEX, 4, 5)[0]
+                x = (w * i) + w - (ts[0] // 2)
+
+                cv2.putText(
+                    rect,
+                    str(w),
+                    (x, door.height + self.padding + 170),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    4,
+                    (255, 0, 0),
+                    thickness=5,
+                )
+                self.draw_rect(
+                    rect,
+                    (w * i + self.padding),
+                    (self.padding + 20),
+                    w,
+                    door.height - 20,
+                    (255, 255, 153),
+                    (0, 0, 0),
+                    -1,
+                )
+                if door.plaid and door.plaid_type == 1:
+                    x1 = (w * i + self.padding) + (150)
+                    y = self.padding + 50
+
+
+                    x2 = (w * i + self.padding) + w - (150)
+                    y2 = self.padding + 50
+
+
+
+
+                    cv2.line(
+                        rect,
+                        (
+                            x1,y2
+                        ),
+                        (
+                            x1,
+                            y2+door.height - 80
+                        ),
+                        (0,0,0),
+                        5
+                    )
+                    cv2.line(
+                        rect,
+                        (
+                            x2,y2
+                        ),
+                        (
+                            x2 ,
+                            y2+door.height - 80
+                        ),
+                        (0,0,0),
+                        5
+                    )
+
+
+                    x3 = (w * i + self.padding)
+                    y3 = door.height + self.padding - 800
+
+
+
+                    cv2.line(
+                        rect,
+                        (
+                            x3,y3
+                        ),
+                        (
+                            x3 + w,
+                            y3
+                        ),
+                        (0,0,0),
+                        5
+                    )
+                    x4 = (w * i + self.padding)
+                    y4 = door.height + self.padding - 950
+
+                    cv2.line(
+                        rect,
+                        (
+                            x4,y4
+                        ),
+                        (
+                            x4 + w,
+                            y4
+                        ),
+                        (0,0,0),
+                        5
+                    )
+
+                if door.plaid and door.plaid_type == 3:
+                    x = (w * i + self.padding) + (w//2)
+                    y = self.padding + 50
+
+
+
+
+                    cv2.line(
+                        rect,
+                        (
+                            x,
+                            y
+                        ),
+                        (
+                            x,
+                            y+door.height - 80
+                        ),
+                        (0,0,0),
+                        5
+                    )
+
+
+                if door.plaid and door.plaid_type in [2,3]:
+                    x = (w* i * self.padding)
+                    y = (self.padding + 50)
+
+                    h = door.height
+
+                    for splits in range(3, 10):
+                        split_height = h // splits
+
+                        if split_height < 700:
+                            print(split_height,i)
+                            for j in range(splits):
+                                # top_left = (x,int(y+i*split_height))
+                                # bottom_right = (x + w, int(y + (i + 1) * split_height))
+                                pt1 = (
+                                    w*i+self.padding,
+                                    self.padding + (split_height * j)
+                                )
+                                pt2 = (
+                                    w*i+self.padding + w,
+                                    int(self.padding + (split_height * j))
+                                )
+                                print(pt1,pt2)
+                                cv2.line(
+                                    rect,
+                                    pt1,
+                                    pt2,
+                                    (0,0,0),
+                                    5
+                                )
+                            break
+
+                if door.castle_pos == 2:
+                    self.arrow(
+                        rect,
+                        (
+                            (w * i + self.padding) + w // 4,
+                            self.padding + (door.height // 2),
+                        ),
+                        (
+                            (w * i + self.padding) + ((w // 4) * 3),
+                            self.padding + (door.height // 2),
+                        ),
+                        (0, 0, 255),
+                        15,
+                        tipLenth=100 / (w / 4 * 3),
+                    )
+                else:
+                    if i != 0 and i != door.cols - 1:
+                        self.arrow(
+                            rect,
+                            (
+                                (w * i + self.padding) + w // 4,
+                                self.padding + (door.height // 2),
+                            ),
+                            (
+                                (w * i + self.padding) + ((w // 4) * 3),
+                                self.padding + (door.height // 2),
+                            ),
+                            (0, 0, 255),
+                            15,
+                            tipLenth=100 / (w / 4 * 3),
+                        )
+                    else:
+                        add_transparent_image(
+                            rect,
+                            self.cross,
+                            # self.handle,
+                            (w * i + self.padding)
+                            + (w // 2)
+                            - (self.cross.shape[0] // 2),
+                            self.padding
+                            + (door.height // 2)
+                            - ((self.cross.shape[1] // 2)),
+                        )
+                if i != 0:
+                    cv2.rectangle(
+                        rect,
+                        (
+                            (w * i + (self.padding - 5)),
+                            door.height + self.padding + 25,
+                        ),
+                        (
+                            (w * i + (self.padding + 5)),
+                            door.height + self.padding + 115,
+                        ),
+                        (0, 0, 255),
+                        -1,
+                    )
+                    self.draw_rect(
+                        rect,
+                        ((w * i + self.padding)),
+                        (self.padding + 20),
+                        20,
+                        door.height - 20,
+                        (153, 153, 153),
+                        (0, 0, 0),
+                        -1,
+                    )
+
+                if i != (door.cols - 1):
+                    self.draw_rect(
+                        rect,
+                        ((w * i + self.padding) + w) - 20,
+                        (self.padding + 20),
+                        40,
+                        door.height - 20,
+                        (153, 153, 153),
+                        (0, 0, 0),
+                        -1,
+                    )
+
+                self.draw_rect(
+                    rect,
+                    (w * i + self.padding),
+                    self.padding + 20,
+                    w,
+                    30,
+                    (153, 153, 153),
+                    (0, 0, 0),
+                    3,
+                )
+                self.draw_rect(
+                    rect,
+                    (w * i + (self.padding)),
+                    door.height + self.padding,
+                    w,
+                    -30,
+                    (153, 153, 153),
+                    (0, 0, 0),
+                    3,
+                )
+
+        else:
+            self.draw_rect(
+                rect,
+                (self.padding),
+                self.padding + 20,
+                door.width,
+                door.height - 20,
+                (255, 255, 153),
+                (0, 0, 0),
+                3,
+            )
+            self.draw_rect(
+                rect,
+                (self.padding),
+                self.padding + 20,
+                door.width,
+                30,
+                (153, 153, 153),
+                (0, 0, 0),
+                3,
+            )
+
+            self.draw_rect(
+                rect,
+                (self.padding),
+                door.height + self.padding,
+                door.width,
+                -30,
+                (153, 153, 153),
+                (0, 0, 0),
+                3,
+            )
+    
+
+class SoftSlideCalculator:
+    def __init__(self, elements: list["SoftSlideElement"], doors: list["SoftSlide"]):
+        self.elements = elements  # elementlar (profil, shisha, tutqich...)
+        self.doors = doors        # bir nechta eshiklar
+
+    def calculate_total(self):
+        total_cost = 0
+        results = []
+
+        for element in self.elements:
+            leftover = 0
+            total_units = 0
+            total_price = 0
+
+            for door in self.doors:
+                need = element.calc_price(door)
+
+                # Agar bu element uzunlikka oid bo'lsa (masalan, profil)
+                if element.unit in ["m", "metr", "m."]:
+                    if leftover >= need:
+                        leftover -= need
+                    else:
+                        required = need - leftover
+                        used = carry(required)  # yangi bo‘lak olinadi
+                        total_units += used
+                        leftover = used - required
+                else:
+                    total_units += need  # m² yoki dona bo‘lsa, to‘g‘ridan-to‘g‘ri qo‘shamiz
+
+            total_price = total_units * element.price
+            total_cost += total_price
+
+            results.append({
+                "element": element.name,
+                "unit": element.unit,
+                "total": round(total_units, 2),
+                "price": round(total_price, 2),
+            })
+
+        color_glass_total = 0
+        for door in self.doors:
+            door_extra_price = door.dye.calc_price(door) + door.mirror.calc_price(door)
+            color_glass_total += door_extra_price
+
+            results.append({
+                "element": f"Rang: {door.dye.name}, Oyna: {door.mirror.name}",
+                "unit": "dona",
+                "total": 1,
+                "price": round(door_extra_price, 2),
+            })
+            total_cost += color_glass_total
+
+        return {
+            "items": results,
+            "total_cost": round(total_cost, 2)
+        }
+
+
+
+

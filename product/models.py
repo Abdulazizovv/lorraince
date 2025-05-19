@@ -44,6 +44,34 @@ class SoftSlide(models.Model):
 
         self.price = int(total + comiss)
         return prices
+    
+    @classmethod
+    def get_plaid_types(cls):
+        return cls._meta.get_field('plaid_type').choices
+    
+    @classmethod
+    def get_plaid_type_from_name(cls, name):
+        """Returns the plaid type value (e.g., 1, 2, 3) given its display name."""
+        # Get all choices for plaid_type
+        choices = dict(cls._meta.get_field('plaid_type').choices)
+        # Reverse the dict to map display names to values
+        reversed_choices = {v.lower(): k for k, v in choices.items()}
+        # Lookup (case-insensitive)
+        return reversed_choices.get(name.lower())
+    
+    @classmethod
+    def get_castle_pos(cls):
+        return cls._meta.get_field('castle_pos').choices
+    
+    @classmethod
+    def get_castle_pos_from_name(cls, name):
+        """Returns the castle position value (e.g., 1, 2) given its display name."""
+        # Get all choices for castle_pos
+        choices = dict(cls._meta.get_field('castle_pos').choices)
+        # Reverse the dict to map display names to values
+        reversed_choices = {v.lower(): k for k, v in choices.items()}
+        # Lookup (case-insensitive)
+        return reversed_choices.get(name.lower())
 
 
 class SoftSlideElement(models.Model):

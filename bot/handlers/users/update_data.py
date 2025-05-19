@@ -17,6 +17,8 @@ async def update_data(message: types.Message, state: FSMContext):
     if not user['is_admin']:
         return
 
+    await message.answer("⏳ Ma'lumotlarni tayyorlanmoqda...")
+
     models: dict[str, Model] = {
         "soft_slide_mirrors": SoftSlideMirror,
         "soft_slide_elements": SoftSlideElement,
