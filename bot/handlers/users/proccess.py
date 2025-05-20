@@ -277,7 +277,9 @@ async def get_color(message: types.Message, state: FSMContext):
 
     calculator = SoftSlideCalculator(elements, [soft_slide])
     prices = calculator.calculate_total()
-    print(prices)
+    
+
+    soft_slide.calc_price()
 
     await message.answer(
         "<i>Iltimos, kuting ...⏳</i>\n" \
