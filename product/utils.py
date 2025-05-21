@@ -656,61 +656,13 @@ class SoftSlideDrawer:
 
 class SoftSlideCalculator:
     def __init__(self, elements: list["SoftSlideElement"], doors: list["SoftSlide"]):
-        self.elements = elements  # elementlar (profil, shisha, tutqich...)
-        self.doors = doors        # bir nechta eshiklar
+        self.elements = elements
+        self.doors = doors
+        
 
     def calculate_total(self):
-        total_cost = 0
-        results = []
-
-        for element in self.elements:
-            leftover = 0
-            total_units = 0
-            total_price = 0
-
-            for door in self.doors:
-                need = element.calc_price(door)
-
-                # Agar bu element uzunlikka oid bo'lsa (masalan, profil)
-                if element.unit in ["m", "metr", "m."]:
-                    if leftover >= need:
-                        leftover -= need
-                    else:
-                        required = need - leftover
-                        used = carry(required)  # yangi bo‘lak olinadi
-                        total_units += used
-                        leftover = used - required
-                else:
-                    total_units += need  # m² yoki dona bo‘lsa, to‘g‘ridan-to‘g‘ri qo‘shamiz
-
-            total_price = total_units * element.price
-            total_cost += total_price
-
-            results.append({
-                "element": element.name,
-                "unit": element.unit,
-                "total": round(total_units, 2),
-                "price": round(total_price, 2),
-            })
-
-        color_glass_total = 0
+        total = 0
         for door in self.doors:
-            door_extra_price = door.dye.calc_price(door) + door.mirror.calc_price(door)
-            color_glass_total += door_extra_price
-
-            results.append({
-                "element": f"Rang: {door.dye.name}, Oyna: {door.mirror.name}",
-                "unit": "dona",
-                "total": 1,
-                "price": round(door_extra_price, 2),
-            })
-            total_cost += color_glass_total
-
-        return {
-            "items": results,
-            "total_cost": round(total_cost, 2)
-        }
-
-
-
-
+            door.calc_price()
+            total += door.price
+        return total

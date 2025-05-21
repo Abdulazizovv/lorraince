@@ -275,12 +275,17 @@ async def get_color(message: types.Message, state: FSMContext):
     # Hisoblash
     elements = SoftSlideElement.objects.all()
 
-    calculator = SoftSlideCalculator(elements, [soft_slide])
-    prices = calculator.calculate_total()
     
 
     soft_slide.calc_price()
 
+    doors = data.get("doors", [])
+    doors.append(soft_slide)
+    await state.update_data(doors=doors)
+
+    calculator = SoftSlideCalculator(elements, doors)
+    price = calculator.calculate_total()
+    print(price)
     await message.answer(
         "<i>Iltimos, kuting ...⏳</i>\n" \
         "<i>Rasm generatsiya qilinmoqda.</i>",
@@ -297,7 +302,7 @@ async def get_color(message: types.Message, state: FSMContext):
     await message.answer_photo(
         photo=image,
         caption=(
-            f"Umumiy narx: {soft_slide.price + commissions} so'm\n"
+            f"Umumiy narx: {price + commissions} so'm\n"
         )
     )
 
@@ -343,8 +348,8 @@ async def get_order_again_count(message: types.Message, state: FSMContext):
     elements = SoftSlideElement.objects.all()
 
     calculator = SoftSlideCalculator(elements, [door] * count)
-    prices = calculator.calculate_total()
-    print(prices)
+    price = calculator.calculate_total()
+    print(price)
 
     commissions = 0
 
@@ -353,9 +358,8 @@ async def get_order_again_count(message: types.Message, state: FSMContext):
 
     await message.answer(
         (
-            f"1 ta uchun narx: {door.price + commissions} so'm\n"
             f"Buyurtma soni: {count}\n"
-            f"Umumiy narx: {prices['total_cost'] + commissions} so'm\n"
+            f"Umumiy narx: {price + commissions} so'm\n"
         )
     )
 
