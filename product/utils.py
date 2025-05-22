@@ -136,55 +136,55 @@ class SoftSlideDrawer:
         img_pil = Image.new("RGB", (3309, 2339), 0xFFFFFF)
         d = ImageDraw.Draw(img_pil)
 
-        self.text_with_color(
-            d,
-            71,
-            81,
-            50,
-            ["профилъ: ", "турецкий алюминиевый профиль "],
-            [(255, 0, 0), (0, 0, 0)],
-        )
-        self.text_with_color(
-            d,
-            71,
-            152,
-            50,
-            [f"стекло: ", f"стеклопакет 4х4  {door.mirror.name}"],
-            [(255, 0, 0), (0, 0, 0)],
-        )
-        self.text_with_color(
-            d,
-            71,
-            223,
-            50,
-            [f"способ открывания: ", "раздвижная "],
-            [(255, 0, 0), (0, 0, 0)],
-        )
-        self.text_with_color(
-            d,
-            71,
-            294,
-            50,
-            ["доводчики: ", "нет"],
-            [(255, 0, 0), (0, 0, 0)],
-        )
-        self.text_with_color(
-            d,
-            71,
-            365,
-            50,
-            ["объем: ", "{:.2f}m2".format((door.width / 1000) * (door.height / 1000))],
-            [(255, 0, 0), (0, 0, 0)],
-        )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     81,
+        #     50,
+        #     ["профилъ: ", "турецкий алюминиевый профиль "],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     152,
+        #     50,
+        #     [f"стекло: ", f"стеклопакет 4х4  {door.mirror.name}"],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     223,
+        #     50,
+        #     [f"способ открывания: ", "раздвижная "],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     294,
+        #     50,
+        #     ["доводчики: ", "нет"],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     365,
+        #     50,
+        #     ["объем: ", "{:.2f}m2".format((door.width / 1000) * (door.height / 1000))],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
 
-        self.text_with_color(
-            d,
-            71,
-            436,
-            50,
-            ["система: ", " Soft Slide"],
-            [(255, 0, 0), (0, 0, 0)],
-        )
+        # self.text_with_color(
+        #     d,
+        #     71,
+        #     436,
+        #     50,
+        #     ["система: ", " Soft Slide"],
+        #     [(255, 0, 0), (0, 0, 0)],
+        # )
 
         img = toImgOpenCV(img_pil)
         img_pil.close()
@@ -193,14 +193,68 @@ class SoftSlideDrawer:
 
         r = self.res_resize(rect)
 
-        y = ((img.shape[0] - r.shape[0]) // 2) + 200
-        x = (img.shape[1] - r.shape[1]) // 2
+        y = ((img.shape[0] - r.shape[0]) // 2)
+        x = ((img.shape[1] - r.shape[1]) // 2) - 600
 
         img[y : y + r.shape[0], x : x + r.shape[1]] = r
 
         rows, cols, channels = self.logo.shape
 
         img[0:rows, img.shape[1] - cols : img.shape[1]] = self.logo
+
+        table_x = img.shape[1] - 1000  # O'ngdan 1000 piksel chapga
+        table_y = img.shape[0] - 800   # Pastdan 800 piksel yuqoriga
+
+        # Jadval chizish
+        self.draw_rect(
+            img,
+            table_x - 50,
+            table_y - 50,
+            900,
+            700,
+            (255, 255, 255),
+            (0, 0, 0),
+            3
+        )
+        img_pil = Image.fromarray(img)
+        d = ImageDraw.Draw(img_pil)
+
+    
+        # Jadval qatorlari
+        specs = [
+            ("Клиент Ф.И.О:", ""),
+            ("Адресс:", f""),
+            ("Контакт номер:", ""),
+            ("Система називания:", "Soft Slide"),
+            ("Количества изделия:", ""),
+            ("Общая плошад :", f"{(door.width / 1000) * (door.height / 1000):.2f} m²"),
+            ("Срок монтаж:", "")
+        ]
+
+        row_height = 80
+        table_width = 900  # Same as in draw_rect()
+
+        for i, (label, value) in enumerate(specs):
+            y_pos = table_y + 50 + (i * row_height)
+
+            # Draw the text
+            self.text_with_color(
+                d,
+                table_x,
+                y_pos,
+                50,
+                [f"{label} ", value],
+                [(0, 0, 0), (128, 128, 128)]
+            )
+
+            # Draw a horizontal line under the text row
+            line_y = y_pos + row_height - 20  # adjust as needed
+            d.line(
+                [(table_x - 50, line_y), (table_x - 50 + table_width, line_y)],
+                fill=(0, 0, 0),
+                width=2
+            )
+        img = np.array(img_pil)
 
         success, buffer = cv2.imencode(".png", img)
         return BytesIO(buffer)
@@ -210,16 +264,16 @@ class SoftSlideDrawer:
         rect = np.zeros((door.height + 700, door.width + 700, 3))
         rect.fill(255)
 
-
+        
         self.draw_rect(
             rect,
             self.padding,
             self.padding,
             door.width,
             door.height,
-            (255, 255, 255),
-            (255, 0, 0),
-            5,
+            (66, 66, 66),
+            (0, 0, 0),
+            55,
         )
 
         self.draw_sizes(door, rect)
@@ -233,9 +287,9 @@ class SoftSlideDrawer:
             self.padding,
             door.width,
             20,
-            (153, 153, 153),
+            (66, 66, 66),
             (0, 0, 0),
-            3,
+            55,
         )
 
         self.draw_rect(
@@ -244,9 +298,9 @@ class SoftSlideDrawer:
             self.padding,
             20,
             door.height,
-            (153, 153, 153),
+            (66, 66, 66),
             (0, 0, 0),
-            3,
+            55,
         )
         self.draw_rect(
             rect,
@@ -254,9 +308,9 @@ class SoftSlideDrawer:
             self.padding,
             -20,
             door.height,
-            (153, 153, 153),
+            (66, 66, 66),
             (0, 0, 0),
-            3,
+            55,
         )
 
         if door.cols % 2 != 0 or door.castle_pos == 2:
@@ -266,9 +320,9 @@ class SoftSlideDrawer:
                 self.padding + door.height - (door.height // 2),
                 40,
                 (door.height // 3),
-                (153, 153, 153),
+                (66, 66, 66),
                 (0, 0, 0),
-                5,
+                25,
             )
             self.draw_rect(
                 rect,
@@ -276,9 +330,9 @@ class SoftSlideDrawer:
                 self.padding + door.height - (door.height // 2),
                 40,
                 (door.height // 3),
-                (153, 153, 153),
+                (66, 66, 66),
                 (0, 0, 0),
-                5,
+                25,
             )
         else:
             self.draw_rect(
@@ -287,9 +341,9 @@ class SoftSlideDrawer:
                 self.padding + door.height - (door.height // 2),
                 40,
                 (door.height // 3),
-                (153, 153, 153),
+                (66, 66, 66),
                 (0, 0, 0),
-                5,
+                25,
             )
             self.draw_rect(
                 rect,
@@ -297,9 +351,9 @@ class SoftSlideDrawer:
                 self.padding + door.height - (door.height // 2),
                 40,
                 (door.height // 3),
-                (153, 153, 153),
+                (66, 66, 66),
                 (0, 0, 0),
-                5,
+                25,
             )
 
 
@@ -315,41 +369,45 @@ class SoftSlideDrawer:
         tlw = 50 / door.width
         tlh = 50 / door.height
 
+        # kenglik ko'rsatgichi
         self.arrow(
             rect,
             (self.padding, self.padding - 70),
             (door.width + self.padding, self.padding - 70),
-            (255, 0, 0),
-            5,
+            (21, 0, 136),
+            15,
             tlw,
         )
 
+        # kenglik matni
         cv2.putText(
             rect,
             str(door.width),
             ((door.width // 2) + self.padding // 2, self.padding - 130),
             cv2.FONT_HERSHEY_SIMPLEX,
-            4,
-            (255, 0, 0),
+            6,
+            (0, 0, 0),
             thickness=10,
         )
 
+        # balandlik ko'rsatgichi
         self.arrow(
             rect,
-            (self.padding - 70, self.padding),
-            (self.padding - 70, door.height + self.padding),
-            (255, 0, 0),
-            5,
+            (self.padding - 90, self.padding),
+            (self.padding - 90, door.height + self.padding),
+            (21, 0, 136),
+            15,
             tlh,
         )
-
+        
+        # balandlik matni
         cv2.putText(
             rect,
             str(door.height),
             (0, (door.height // 2) + self.padding),
             cv2.FONT_HERSHEY_SIMPLEX,
             4,
-            (255, 0, 0),
+            (0, 0, 0),
             thickness=10,
         )
 
@@ -357,7 +415,7 @@ class SoftSlideDrawer:
             w = door.width // door.cols
             for i in range(door.cols):
 
-
+                # pastgi ko'rsatgich va matn
                 tl = 50 / w
                 self.arrow(
                     rect,
@@ -369,8 +427,8 @@ class SoftSlideDrawer:
                         (w * i + self.padding + w) - (5 if (i != door.cols - 1) else 0),
                         door.height + (self.padding + 70),
                     ),
-                    (2550, 0, 0),
-                    5,
+                    (21, 0, 136),
+                    25,
                     tl,
                 )
                 ts = cv2.getTextSize(str(w), cv2.FONT_HERSHEY_SIMPLEX, 4, 5)[0]
@@ -382,142 +440,145 @@ class SoftSlideDrawer:
                     (x, door.height + self.padding + 170),
                     cv2.FONT_HERSHEY_SIMPLEX,
                     4,
-                    (255, 0, 0),
+                    (0, 0, 0),
                     thickness=5,
                 )
+                # har bir bo'linma deraza
                 self.draw_rect(
                     rect,
                     (w * i + self.padding),
                     (self.padding + 20),
                     w,
                     door.height - 20,
-                    (255, 255, 153),
+                    (196, 168, 127),
                     (0, 0, 0),
                     -1,
                 )
-                if door.plaid and door.plaid_type == 1:
-                    x1 = (w * i + self.padding) + (150)
-                    y = self.padding + 50
+
+                # Door Plaid | Shatlanka
+                # if door.plaid and door.plaid_type == 1:
+                #     x1 = (w * i + self.padding) + (150)
+                #     y = self.padding + 50
 
 
-                    x2 = (w * i + self.padding) + w - (150)
-                    y2 = self.padding + 50
-
-
-
-
-                    cv2.line(
-                        rect,
-                        (
-                            x1,y2
-                        ),
-                        (
-                            x1,
-                            y2+door.height - 80
-                        ),
-                        (0,0,0),
-                        5
-                    )
-                    cv2.line(
-                        rect,
-                        (
-                            x2,y2
-                        ),
-                        (
-                            x2 ,
-                            y2+door.height - 80
-                        ),
-                        (0,0,0),
-                        5
-                    )
-
-
-                    x3 = (w * i + self.padding)
-                    y3 = door.height + self.padding - 800
-
-
-
-                    cv2.line(
-                        rect,
-                        (
-                            x3,y3
-                        ),
-                        (
-                            x3 + w,
-                            y3
-                        ),
-                        (0,0,0),
-                        5
-                    )
-                    x4 = (w * i + self.padding)
-                    y4 = door.height + self.padding - 950
-
-                    cv2.line(
-                        rect,
-                        (
-                            x4,y4
-                        ),
-                        (
-                            x4 + w,
-                            y4
-                        ),
-                        (0,0,0),
-                        5
-                    )
-
-                if door.plaid and door.plaid_type == 3:
-                    x = (w * i + self.padding) + (w//2)
-                    y = self.padding + 50
+                #     x2 = (w * i + self.padding) + w - (150)
+                #     y2 = self.padding + 50
 
 
 
 
-                    cv2.line(
-                        rect,
-                        (
-                            x,
-                            y
-                        ),
-                        (
-                            x,
-                            y+door.height - 80
-                        ),
-                        (0,0,0),
-                        5
-                    )
+                #     cv2.line(
+                #         rect,
+                #         (
+                #             x1,y2
+                #         ),
+                #         (
+                #             x1,
+                #             y2+door.height - 80
+                #         ),
+                #         (0,0,0),
+                #         5
+                #     )
+                #     cv2.line(
+                #         rect,
+                #         (
+                #             x2,y2
+                #         ),
+                #         (
+                #             x2 ,
+                #             y2+door.height - 80
+                #         ),
+                #         (0,0,0),
+                #         5
+                #     )
 
 
-                if door.plaid and door.plaid_type in [2,3]:
-                    x = (w* i * self.padding)
-                    y = (self.padding + 50)
+                #     x3 = (w * i + self.padding)
+                #     y3 = door.height + self.padding - 800
 
-                    h = door.height
 
-                    for splits in range(3, 10):
-                        split_height = h // splits
 
-                        if split_height < 700:
-                            print(split_height,i)
-                            for j in range(splits):
-                                # top_left = (x,int(y+i*split_height))
-                                # bottom_right = (x + w, int(y + (i + 1) * split_height))
-                                pt1 = (
-                                    w*i+self.padding,
-                                    self.padding + (split_height * j)
-                                )
-                                pt2 = (
-                                    w*i+self.padding + w,
-                                    int(self.padding + (split_height * j))
-                                )
-                                print(pt1,pt2)
-                                cv2.line(
-                                    rect,
-                                    pt1,
-                                    pt2,
-                                    (0,0,0),
-                                    5
-                                )
-                            break
+                #     cv2.line(
+                #         rect,
+                #         (
+                #             x3,y3
+                #         ),
+                #         (
+                #             x3 + w,
+                #             y3
+                #         ),
+                #         (0,0,0),
+                #         5
+                #     )
+                #     x4 = (w * i + self.padding)
+                #     y4 = door.height + self.padding - 950
+
+                #     cv2.line(
+                #         rect,
+                #         (
+                #             x4,y4
+                #         ),
+                #         (
+                #             x4 + w,
+                #             y4
+                #         ),
+                #         (0,0,0),
+                #         5
+                #     )
+
+                # if door.plaid and door.plaid_type == 3:
+                #     x = (w * i + self.padding) + (w//2)
+                #     y = self.padding + 50
+
+
+
+
+                #     cv2.line(
+                #         rect,
+                #         (
+                #             x,
+                #             y
+                #         ),
+                #         (
+                #             x,
+                #             y+door.height - 80
+                #         ),
+                #         (0,0,0),
+                #         5
+                #     )
+
+
+                # if door.plaid and door.plaid_type in [2,3]:
+                #     x = (w* i * self.padding)
+                #     y = (self.padding + 50)
+
+                #     h = door.height
+
+                #     for splits in range(3, 10):
+                #         split_height = h // splits
+
+                #         if split_height < 700:
+                #             print(split_height,i)
+                #             for j in range(splits):
+                #                 # top_left = (x,int(y+i*split_height))
+                #                 # bottom_right = (x + w, int(y + (i + 1) * split_height))
+                #                 pt1 = (
+                #                     w*i+self.padding,
+                #                     self.padding + (split_height * j)
+                #                 )
+                #                 pt2 = (
+                #                     w*i+self.padding + w,
+                #                     int(self.padding + (split_height * j))
+                #                 )
+                #                 print(pt1,pt2)
+                #                 cv2.line(
+                #                     rect,
+                #                     pt1,
+                #                     pt2,
+                #                     (0,0,0),
+                #                     5
+                #                 )
+                #             break
 
                 if door.castle_pos == 2:
                     self.arrow(
@@ -582,9 +643,9 @@ class SoftSlideDrawer:
                         (self.padding + 20),
                         20,
                         door.height - 20,
-                        (153, 153, 153),
+                        (62, 63, 61),
                         (0, 0, 0),
-                        -1,
+                        10,
                     )
 
                 if i != (door.cols - 1):
@@ -594,9 +655,9 @@ class SoftSlideDrawer:
                         (self.padding + 20),
                         40,
                         door.height - 20,
-                        (153, 153, 153),
+                        (62, 63, 61),
                         (0, 0, 0),
-                        -1,
+                        10,
                     )
 
                 self.draw_rect(
@@ -605,9 +666,9 @@ class SoftSlideDrawer:
                     self.padding + 20,
                     w,
                     30,
-                    (153, 153, 153),
+                    (62, 63, 61),
                     (0, 0, 0),
-                    3,
+                    10,
                 )
                 self.draw_rect(
                     rect,
@@ -615,9 +676,9 @@ class SoftSlideDrawer:
                     door.height + self.padding,
                     w,
                     -30,
-                    (153, 153, 153),
+                    (62, 63, 61),
                     (0, 0, 0),
-                    3,
+                    10,
                 )
 
         else:
@@ -637,9 +698,9 @@ class SoftSlideDrawer:
                 self.padding + 20,
                 door.width,
                 30,
-                (153, 153, 153),
+                (62, 63, 61),
                 (0, 0, 0),
-                3,
+                10,
             )
 
             self.draw_rect(
@@ -648,9 +709,9 @@ class SoftSlideDrawer:
                 door.height + self.padding,
                 door.width,
                 -30,
-                (153, 153, 153),
+                (62, 63, 61),
                 (0, 0, 0),
-                3,
+                10,
             )
     
 

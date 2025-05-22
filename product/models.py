@@ -31,6 +31,9 @@ class SoftSlide(models.Model):
     )
 
     price = models.BigIntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted_at = models.DateTimeField(null=True, blank=True)
 
     def calc_price(self):
         elements = SoftSlideElement.objects.all()
@@ -96,6 +99,17 @@ class SoftSlideElement(models.Model):
         exec(self.formula, lcs, lcs)
         print(f"{self.name}: {lcs['res']}")
         return lcs["res"]
+    
+    def calc_need(self, temp: "SoftSlide"):
+        price = self.calc_price(temp)
+        if self.unit == "m2":
+            return price / (temp.width * temp.height) * 1000000
+        elif self.unit == "m":
+            return price / (temp.width + temp.height) * 1000
+        elif self.unit == "kg":
+            return price / 1000
+        else:
+            return 1
 
 
 class SoftSlideMirror(models.Model):
@@ -120,6 +134,18 @@ class SoftSlideMirror(models.Model):
         exec(self.formula, lcs, lcs)
         print(f"{self.name}: {lcs['res']}")
         return lcs["res"]
+    
+    def calc_need(self, temp: "SoftSlide"):
+        price = self.calc_price(temp)
+        if self.unit == "m2":
+            return price / (temp.width * temp.height) * 1000000
+        elif self.unit == "m":
+            return price / (temp.width + temp.height) * 1000
+        elif self.unit == "kg":
+            return price / 1000
+        else:
+            return 1
+    
 
 
 class SoftSlideDye(models.Model):
@@ -144,3 +170,14 @@ class SoftSlideDye(models.Model):
         exec(self.formula, lcs, lcs)
         print(f"{self.name}: {lcs['res']}")
         return lcs["res"]
+    
+    def calc_need(self, temp: "SoftSlide"):
+        price = self.calc_price(temp)
+        if self.unit == "m2":
+            return price / (temp.width * temp.height) * 1000000
+        elif self.unit == "m":
+            return price / (temp.width + temp.height) * 1000
+        elif self.unit == "kg":
+            return price / 1000
+        else:
+            return 1
